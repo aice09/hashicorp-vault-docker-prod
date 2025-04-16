@@ -1,0 +1,45 @@
+version: "3.8"
+
+services:
+  vault:
+    image: hashicorp/vault:latest
+    container_name: vault
+    environment:
+      - VAULT_DEV_ROOT_TOKEN_ID=root
+      - VAULT_LOCAL_CONFIG=/vault/config/config.hcl
+    volumes:
+      - ./vault-config:/vault/config
+      - vault-data:/vault/data
+    ports:
+      - "8200:8200"
+    networks:
+      - vault-network
+    cap_add:
+      - IPC_LOCK
+    restart: always
+    command: server
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8200/v1/sys/health"]
+      interval: 10s
+      retries: 5
+      start_period: 10s
+
+  vault-agent:
+    image: hashicorp/vault:latest
+    container_name: vault-agent
+    command: "agent -config=/vault/config/vault-agent-config.hcl"
+    volumes:
+      - ./vault-config:/vault/config
+      - ./vault-config/certs:/vault/config/certs
+    networks:
+      - vault-network
+    depends_on:
+      - vault
+    restart: always
+
+volumes:
+  vault-data:
+
+networks:
+  vault-network:
+    driver: bridge
