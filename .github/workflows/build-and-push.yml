@@ -32,8 +32,8 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./Dockerfile
+          file: Dockerfile
           push: true
           tags: |
             docker.io/aice0927/hashicorp-vault-docker-prod:latest
-            docker.io/aice0927/hashicorp-vault-docker-prod:${{ env.TAG }}
+            docker.io/aice0927/hashicorp-vault-docker-prod:${{ steps.get_version.outputs.VERSION }}
